@@ -1,32 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
+import { useForm, ValidationError } from '@formspree/react';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the data to a server
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', message: '' });
-    }, 3000);
-  };
+  const [state, handleSubmit] = useForm("xaqpgzpe");
 
   return (
     <section id="contact" className="py-20 px-4 bg-white">
@@ -60,8 +37,6 @@ const Contact = () => {
               type="text"
               id="name"
               name="name"
-              value={formData.name}
-              onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all duration-200"
               placeholder="Your Name"
@@ -76,11 +51,15 @@ const Contact = () => {
               type="email"
               id="email"
               name="email"
-              value={formData.email}
-              onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all duration-200"
               placeholder="your.email@example.com"
+            />
+            <ValidationError
+              prefix="Email"
+              field="email"
+              errors={state.errors}
+              className="text-red-500 text-sm mt-1"
             />
           </div>
 
@@ -91,26 +70,31 @@ const Contact = () => {
             <textarea
               id="message"
               name="message"
-              value={formData.message}
-              onChange={handleChange}
               required
               rows={6}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all duration-200 resize-none"
               placeholder="Your message here..."
             />
+            <ValidationError
+              prefix="Message"
+              field="message"
+              errors={state.errors}
+              className="text-red-500 text-sm mt-1"
+            />
           </div>
 
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-accent text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 transition-colors duration-200 shadow-lg"
+            disabled={state.submitting}
+            whileHover={{ scale: state.submitting ? 1 : 1.02 }}
+            whileTap={{ scale: state.submitting ? 1 : 0.98 }}
+            className="w-full bg-accent text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 transition-colors duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitted ? 'Message Sent!' : 'Send Message'}
+            {state.submitting ? 'Sending...' : 'Send Message'}
           </motion.button>
         </motion.form>
 
-        {isSubmitted && (
+        {state.succeeded && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
